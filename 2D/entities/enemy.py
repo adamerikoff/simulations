@@ -12,7 +12,7 @@ class Enemy:
 
         self.rect = self._set_rect()  # Initialize the rect for collision checking
 
-    def update(self, dt, wind):
+    def update(self):
         pass
 
     def render(self, screen):

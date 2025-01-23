@@ -24,27 +24,27 @@ class Environment:
         # Time tracking
         self.time_elapsed = 0  # Total time in seconds
         self.wind = self._generate_wind()
-        self.entities = self._initialize_entities()
+        self._initialize_entities()
         self.score = 0  # Initialize score
 
 
     def update(self):
         dt = self.clock.tick(FPS) / 1000.0
         self.time_elapsed += dt
-        for entity in self.entities:
-            entity.update(dt, self.wind)
-            # Check if the entity is a Grenade
-            if isinstance(entity, Grenade):
-                if entity.hit_ground:
-                        self.score = self._calculate_score()
+        self.drone.update(dt)
+        self.grenade.update(dt, self.wind)
+        self.enemy.update()
+        if self.grenade.hit_ground:
+            self.score = self._calculate_score()
 
     def render(self):
         """Render all elements to the screen."""
         # Fill the screen with the background color
         self.screen.fill(self.background_color)
         self._draw_info()
-        for entity in self.entities:
-            entity.render(self.screen)
+        self.drone.render(self.screen)
+        self.grenade.render(self.screen)
+        self.enemy.render(self.screen)
 
     def run(self):
         """Main loop for the environment."""
@@ -71,20 +71,14 @@ class Environment:
         return wind_speed
 
     def _initialize_entities(self):
-        entities = []
-    
-        entities.append(Drone(random.randint(0, WIDTH), random.randint(100, HEIGHT)))
-
-        entities.append(entities[0].grenade)
-
-        entities.append(Enemy(random.randint(20, WIDTH-20)))
-
-        return entities
+        self.drone = Drone(random.randint(0, WIDTH), random.randint(0, HEIGHT-90))
+        self.grenade = self.drone.grenade
+        self.enemy = Enemy(random.randint(20, WIDTH-20))
 
     def _calculate_score(self):
         # Calculate distance to enemy (enemy is a square at the bottom)
-        enemy_position = self.entities[2].position
-        grenade_position = self.entities[1].position
+        enemy_position = self.enemy.position
+        grenade_position = self.grenade.position
         # Calculate the horizontal (X) distance between the grenade and the enemy
         x_distance = abs(grenade_position.x - enemy_position.x)
         
@@ -107,12 +101,11 @@ class Environment:
         self.screen.blit(text, (SCREEN_WIDTH - 150, 10))
 
     def _draw_grenade_velocity(self):
-        grenade = self.entities[1]
         # Get the magnitude (speed) of the velocity vector
-        velocity_magnitude = grenade.velocity.length()  # This gives the speed as a scalar value (m/s)
+        velocity_magnitude = self.grenade.velocity.length()  # This gives the speed as a scalar value (m/s)
         # Create the text to display the current velocity and terminal velocity
         velocity_text = f"Velocity: {velocity_magnitude:.2f} m/s"
-        terminal_velocity_text = f"T.Velocity: {grenade.terminal_velocity:.2f} m/s"        
+        terminal_velocity_text = f"T.Velocity: {self.grenade.terminal_velocity:.2f} m/s"        
         # Render the text and display it on the screen
         text = self.font.render(velocity_text, True, (0, 0, 0))
         self.screen.blit(text, (SCREEN_WIDTH - 150, 30))

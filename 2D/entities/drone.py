@@ -20,7 +20,7 @@ class Drone:
 
         self.grenade = Grenade(self.position.x, self.position.y)
 
-    def update(self, dt, wind):
+    def update(self, dt):
         # Movement controls based on arrow keys
         keys = pygame.key.get_pressed()
 
