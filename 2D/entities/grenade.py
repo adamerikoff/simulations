@@ -20,52 +20,55 @@ class Grenade:
         self.terminal_velocity = self._calculate_terminal_velocity()  # m/s
 
         self.rect = self._set_rect()  # Initialize the rect for collision checking
+        self.released = False  # Flag to track if grenade is released
+
 
     def update(self, dt, wind):
-        # Forces: gravity and drag
-        gravitational_force = Vector2(0, self.mass * GRAVITY)  # Gravity acts downward
-        
-        # Relative velocity (object velocity relative to wind)
-        relative_velocity = self.velocity - self._calculate_wind(wind)
+        if self.released:
+            # Forces: gravity and drag
+            gravitational_force = Vector2(0, self.mass * GRAVITY)  # Gravity acts downward
+            
+            # Relative velocity (object velocity relative to wind)
+            relative_velocity = self.velocity - self._calculate_wind(wind)
 
-        # Drag force (only applies if relative velocity exists)
-        if relative_velocity.length() > 0:
-            drag_force = (
-                -0.5
-                * AIR_DENSITY
-                * self.drag_coefficient
-                * self.cross_sectional_area
-                * relative_velocity.length_squared()
-                * relative_velocity.normalize()
-            )
-        else:
-            drag_force = Vector2(0, 0)  # No drag force if no movement
+            # Drag force (only applies if relative velocity exists)
+            if relative_velocity.length() > 0:
+                drag_force = (
+                    -0.5
+                    * AIR_DENSITY
+                    * self.drag_coefficient
+                    * self.cross_sectional_area
+                    * relative_velocity.length_squared()
+                    * relative_velocity.normalize()
+                )
+            else:
+                drag_force = Vector2(0, 0)  # No drag force if no movement
 
-        # Net force = gravity + drag force
-        net_force = gravitational_force + drag_force
+            # Net force = gravity + drag force
+            net_force = gravitational_force + drag_force
 
-        # Acceleration = Net force / mass
-        acceleration = net_force / self.mass
+            # Acceleration = Net force / mass
+            acceleration = net_force / self.mass
 
-        # Update velocity: velocity += acceleration * dt
-        self.velocity += acceleration * dt
+            # Update velocity: velocity += acceleration * dt
+            self.velocity += acceleration * dt
 
-        # Cap velocity at terminal velocity
-        if self.velocity.length() > self.terminal_velocity:
-            self.velocity = self.velocity.normalize() * self.terminal_velocity
+            # Cap velocity at terminal velocity
+            if self.velocity.length() > self.terminal_velocity:
+                self.velocity = self.velocity.normalize() * self.terminal_velocity
 
-        # Update position: position += velocity * dt
-        self.position += self.velocity * dt
+            # Update position: position += velocity * dt
+            self.position += self.velocity * dt
 
-        # Collision with the ground
-        if self.position.y >= HEIGHT:
-            self.position.y = HEIGHT
-            self.velocity.y = 0  # Stop vertical velocity on ground collision
-            # Optionally dampen horizontal velocity on ground collision
-            self.velocity.x *= 0  # Simulate friction on the ground
+            # Collision with the ground
+            if self.position.y >= HEIGHT:
+                self.position.y = HEIGHT
+                self.velocity.y = 0  # Stop vertical velocity on ground collision
+                # Optionally dampen horizontal velocity on ground collision
+                self.velocity.x *= 0  # Simulate friction on the ground
 
-        # Update the rect position to match the new position
-        self.rect = self._set_rect()
+            # Update the rect position to match the new position
+            self.rect = self._set_rect()
 
     def render(self, screen):
         # Convert position to pixels for rendering
@@ -84,7 +87,6 @@ class Grenade:
 
     def _calculate_wind(self, wind):
         max_altitude = HEIGHT  # Maximum altitude (meters) for wind scaling
-        min_altitude = 0    # Ground level
 
         # Calculate the altitude proportion
         altitude = HEIGHT - self.position.y
