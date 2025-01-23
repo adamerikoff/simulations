@@ -32,10 +32,7 @@ class Environment:
         """Render all elements to the screen."""
         # Fill the screen with the background color
         self.screen.fill(self.background_color)
-        # Draw the scale
-        self._draw_scale()
-        # Display time elapsed
-        self._draw_time_counter()
+        self._draw_info()
         for entity in self.entities:
             entity.render(self.screen)
 
@@ -74,3 +71,17 @@ class Environment:
         time_text = f"Time: {self.time_elapsed:.2f} s"
         text = self.font.render(time_text, True, (0, 0, 0))
         self.screen.blit(text, (SCREEN_WIDTH - 150, 10))
+
+    def _draw_grenade_velocity(self):
+        grenade = self.entities[0]
+        velocity_text = f"Velocity: {grenade.velocity:.2f} m/s"
+        terminal_velocity_text = f"T.Velocity: {grenade.terminal_velocity:.2f} m/s"
+        text = self.font.render(velocity_text, True, (0, 0, 0))
+        self.screen.blit(text, (SCREEN_WIDTH - 150, 30))
+        text = self.font.render(terminal_velocity_text, True, (0, 0, 0))
+        self.screen.blit(text, (SCREEN_WIDTH - 150, 50))    
+
+    def _draw_info(self):
+        self._draw_scale()
+        self._draw_time_counter()
+        self._draw_grenade_velocity()  # Call the new method to render velocity

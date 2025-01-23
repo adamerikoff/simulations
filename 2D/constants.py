@@ -8,5 +8,7 @@ FPS = 30
 
 GRAVITY = 9.8
 
+AIR_DENSITY = 1.225
+
 
 
