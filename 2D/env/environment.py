@@ -25,12 +25,18 @@ class Environment:
         self.time_elapsed = 0  # Total time in seconds
         self.wind = self._generate_wind()
         self.entities = self._initialize_entities()
+        self.score = 0  # Initialize score
+
 
     def update(self):
         dt = self.clock.tick(FPS) / 1000.0
         self.time_elapsed += dt
         for entity in self.entities:
             entity.update(dt, self.wind)
+            # Check if the entity is a Grenade
+            if isinstance(entity, Grenade):
+                if entity.hit_ground:
+                        self.score = self._calculate_score()
 
     def render(self):
         """Render all elements to the screen."""
@@ -67,13 +73,28 @@ class Environment:
     def _initialize_entities(self):
         entities = []
     
-        entities.append(Drone(random.randint(0, WIDTH), random.randint(0, HEIGHT-90)))
+        entities.append(Drone(random.randint(0, WIDTH), random.randint(100, HEIGHT)))
 
         entities.append(entities[0].grenade)
 
         entities.append(Enemy(random.randint(20, WIDTH-20)))
 
         return entities
+
+    def _calculate_score(self):
+        # Calculate distance to enemy (enemy is a square at the bottom)
+        enemy_position = self.entities[2].position
+        grenade_position = self.entities[1].position
+        # Calculate the horizontal (X) distance between the grenade and the enemy
+        x_distance = abs(grenade_position.x - enemy_position.x)
+        
+        # Check if the grenade is within 5 meters horizontally of the enemy
+        if x_distance <= 10:  # 5 meters range
+            # Calculate the reward based on the distance (this is just an example)
+            reward = max(0, 100 - int(x_distance * 20))  # Decreases with distance, max reward = 100
+            return reward  # Return the calculated reward
+        else:
+            return 0  # No reward if outside the range
 
     def _draw_scale(self):
         for y in range(0, HEIGHT+20, 20):
@@ -123,8 +144,15 @@ class Environment:
         text = self.font.render(wind_text, True, (0, 0, 0))
         self.screen.blit(text, (SCREEN_WIDTH - 150, 90))
 
+    def _draw_score(self):
+        # Display score
+        score_text = f"Score: {self.score}"
+        text = self.font.render(score_text, True, (0, 0, 0))
+        self.screen.blit(text, (SCREEN_WIDTH - 150, 110))
+    
     def _draw_info(self):
         self._draw_scale()
         self._draw_time_counter()
         self._draw_grenade_velocity()
         self._draw_wind_info()
+        self._draw_score()

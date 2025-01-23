@@ -21,10 +21,11 @@ class Grenade:
 
         self.rect = self._set_rect()  # Initialize the rect for collision checking
         self.released = False  # Flag to track if grenade is released
+        self.hit_ground = False  # Flag to track if grenade has hit the ground
 
 
     def update(self, dt, wind):
-        if self.released:
+        if self.released and not self.hit_ground:
             # Forces: gravity and drag
             gravitational_force = Vector2(0, self.mass * GRAVITY)  # Gravity acts downward
             
@@ -65,8 +66,9 @@ class Grenade:
                 self.position.y = HEIGHT
                 self.velocity.y = 0  # Stop vertical velocity on ground collision
                 # Optionally dampen horizontal velocity on ground collision
-                self.velocity.x *= 0  # Simulate friction on the ground
-
+                self.velocity.x = 0  # Simulate friction on the ground
+                self.hit_ground = True  # Set the flag when grenade contacts the earth
+                print("[GRENADE]: ground contact")
             # Update the rect position to match the new position
             self.rect = self._set_rect()
 
