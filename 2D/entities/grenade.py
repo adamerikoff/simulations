@@ -10,7 +10,7 @@ class Grenade:
         self.position = Vector2(x, y)
         self.velocity = Vector2(0, 0)
 
-        self.fake_radius = 5
+        self.fake_radius = 3
         self.color = (255, 0, 0)
 
         self.radius = 0.032  # m (radius in meters)

@@ -5,7 +5,7 @@ import pygame
 from pygame.math import Vector2
 
 from constants import SCREEN_HEIGHT, SCREEN_WIDTH, FPS, PIXELS_PER_METER, WIDTH, HEIGHT
-from entities import Grenade
+from entities import Grenade, Drone
 
 
 class Environment:
@@ -67,9 +67,10 @@ class Environment:
     def _initialize_entities(self):
         entities = []
         
-        grenade = Grenade(random.randint(0, WIDTH), random.randint(80, HEIGHT))
-        self.grenade_initial_pos = grenade.position.copy()
+        entities.append(Drone(WIDTH // 2, HEIGHT // 2))
 
+        grenade = Grenade(random.randint(0, WIDTH), random.randint(0, HEIGHT - 100))
+        self.grenade_initial_pos = grenade.position.copy()
         entities.append(grenade)
         return entities
 
@@ -84,7 +85,7 @@ class Environment:
         self.screen.blit(text, (SCREEN_WIDTH - 150, 10))
 
     def _draw_grenade_velocity(self):
-        grenade = self.entities[0]
+        grenade = self.entities[1]
         # Get the magnitude (speed) of the velocity vector
         velocity_magnitude = grenade.velocity.length()  # This gives the speed as a scalar value (m/s)
         # Create the text to display the current velocity and terminal velocity
