@@ -74,14 +74,19 @@ class Environment:
 
     def _draw_grenade_velocity(self):
         grenade = self.entities[0]
-        velocity_text = f"Velocity: {grenade.velocity:.2f} m/s"
-        terminal_velocity_text = f"T.Velocity: {grenade.terminal_velocity:.2f} m/s"
+        # Get the magnitude (speed) of the velocity vector
+        velocity_magnitude = grenade.velocity.length()  # This gives the speed as a scalar value (m/s)
+        # Create the text to display the current velocity and terminal velocity
+        velocity_text = f"Velocity: {velocity_magnitude:.2f} m/s"
+        terminal_velocity_text = f"T.Velocity: {grenade.terminal_velocity:.2f} m/s"        
+        # Render the text and display it on the screen
         text = self.font.render(velocity_text, True, (0, 0, 0))
         self.screen.blit(text, (SCREEN_WIDTH - 150, 30))
         text = self.font.render(terminal_velocity_text, True, (0, 0, 0))
-        self.screen.blit(text, (SCREEN_WIDTH - 150, 50))    
+        self.screen.blit(text, (SCREEN_WIDTH - 150, 50))
+
 
     def _draw_info(self):
         self._draw_scale()
         self._draw_time_counter()
-        self._draw_grenade_velocity()  # Call the new method to render velocity
+        self._draw_grenade_velocity()
