@@ -9,7 +9,7 @@ from entities import Grenade, Drone, Enemy
 
 
 class Environment:
-    def __init__(self):
+    def __init__(self, mode="human"):
         # Initialize Pygame
         pygame.init()
         # Set up the display
@@ -27,6 +27,52 @@ class Environment:
         self._initialize_entities()
         self.score = 0  # Initialize score
         self.current_action = None
+        self.mode = mode  # "human" or "rl"
+        self.action_space = [1, 2, 3]
+
+    def reset(self):
+        self.time_elapsed = 0
+        self.wind = self._generate_wind()
+        self._initialize_entities()
+        self.score = 0
+        return self.get_state()
+
+    def get_state(self):
+        # Represent the state as a vector
+        return [
+            self.drone.position.x, self.drone.position.y,
+            self.grenade.position.x, self.grenade.position.y,
+            self.enemy.position.x,
+            self.wind.x, self.wind.y
+        ]
+
+    def step(self, action, render=True):
+        self.current_action = None
+        if action == 1:
+            self.current_action = "drone_left"
+        elif action == 2:
+            self.current_action = "drone_right"
+        elif action == 3:
+            self.current_action = "drone_release"
+
+        # Update the environment
+        self.update()
+
+        # Render the environment if requested
+        if render:
+            self.render()
+            pygame.display.flip()  # Update the display
+
+        # Check if the episode is done
+        done = self.grenade.hit_ground
+
+        # Get the reward
+        reward = self._calculate_score() if done else 0
+
+        # Get the next state
+        state = self.get_state()
+
+        return state, reward, done, {}
 
     def update(self):
         dt = self.clock.tick(FPS) / 1000.0
@@ -47,10 +93,9 @@ class Environment:
         self.enemy.render(self.screen)
 
     def run(self):
-        """Main loop for the environment."""
         running = True
         while running:
-            # Handle events
+            # Handle events for human control
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
@@ -64,16 +109,13 @@ class Environment:
                 elif event.type == pygame.KEYUP:
                     if event.key in (pygame.K_LEFT, pygame.K_RIGHT, pygame.K_SPACE):
                         self.current_action = None
-            # Update the environment
+
+            # Update and render the environment
             self.update()
-            # Render the environment
             self.render()
-            # Update the display
             pygame.display.flip()
-            # Cap the frame rate
             self.clock.tick(FPS)
 
-        # Quit Pygame
         pygame.quit()
 
     def _generate_wind(self):
@@ -81,7 +123,7 @@ class Environment:
         return wind_speed
 
     def _initialize_entities(self):
-        self.drone = Drone(random.randint(0, WIDTH), random.randint(0, HEIGHT-90))
+        self.drone = Drone(random.randint(40, WIDTH-40), random.randint(0, HEIGHT-90))
         self.grenade = self.drone.grenade
         self.enemy = Enemy(random.randint(20, WIDTH-20))
 

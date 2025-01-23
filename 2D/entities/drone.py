@@ -47,8 +47,8 @@ class Drone:
                 self.width, self.height
             )
         )
-        if self.grenade.released:
-            self._draw_straight_projectory(screen)
+        # if self.grenade.released:
+        #     self._draw_straight_projectory(screen)
 
     def _draw_straight_projectory(self, screen):
         pygame.draw.line(
