@@ -3,7 +3,7 @@ import math
 import pygame
 from pygame.math import Vector2
 
-from constants import GRAVITY, PIXELS_PER_METER, HEIGHT, WIDTH, AIR_DENSITY
+from constants import GRAVITY, PIXELS_PER_METER, HEIGHT, AIR_DENSITY
 
 class Grenade:
     def __init__(self, x, y):
@@ -12,7 +12,7 @@ class Grenade:
 
         self.fake_radius = 5
         self.color = (255, 0, 0)
-        
+
         self.radius = 0.032  # m (radius in meters)
         self.mass = 0.4  # kg (mass in kilograms)
         self.drag_coefficient = 0.47  # Drag coefficient for a sphere
@@ -21,21 +21,30 @@ class Grenade:
 
         self.rect = self._set_rect()  # Initialize the rect for collision checking
 
-
-    def update(self, dt):
+    def update(self, dt, wind):
         # Forces: gravity and drag
         gravitational_force = Vector2(0, self.mass * GRAVITY)  # Gravity acts downward
+        
+        # Relative velocity (object velocity relative to wind)
+        relative_velocity = self.velocity - self._calculate_wind(wind)
 
-        # Apply drag force only if the velocity is non-zero
-        if self.velocity.length() > 0:
-            drag_force = -0.5 * AIR_DENSITY * self.drag_coefficient * self.cross_sectional_area * self.velocity.length_squared() * self.velocity.normalize()  # Drag force (vector)
+        # Drag force (only applies if relative velocity exists)
+        if relative_velocity.length() > 0:
+            drag_force = (
+                -0.5
+                * AIR_DENSITY
+                * self.drag_coefficient
+                * self.cross_sectional_area
+                * relative_velocity.length_squared()
+                * relative_velocity.normalize()
+            )
         else:
             drag_force = Vector2(0, 0)  # No drag force if no movement
 
         # Net force = gravity + drag force
         net_force = gravitational_force + drag_force
 
-        # Acceleration = Net force / Mass
+        # Acceleration = Net force / mass
         acceleration = net_force / self.mass
 
         # Update velocity: velocity += acceleration * dt
@@ -51,11 +60,12 @@ class Grenade:
         # Collision with the ground
         if self.position.y >= HEIGHT:
             self.position.y = HEIGHT
-            self.velocity.y = 0  # Stop vertical velocity when hitting the ground
+            self.velocity.y = 0  # Stop vertical velocity on ground collision
+            # Optionally dampen horizontal velocity on ground collision
+            self.velocity.x *= 0  # Simulate friction on the ground
 
         # Update the rect position to match the new position
         self.rect = self._set_rect()
-
 
     def render(self, screen):
         # Convert position to pixels for rendering
@@ -66,19 +76,28 @@ class Grenade:
             self.fake_radius
         )
 
-
     def _calculate_terminal_velocity(self):
         return math.sqrt(
-            (2 * self.mass * GRAVITY) / 
-            (AIR_DENSITY * self.drag_coefficient * self.cross_sectional_area)
-            )
+            (2 * self.mass * GRAVITY)
+            / (AIR_DENSITY * self.drag_coefficient * self.cross_sectional_area)
+        )
 
+    def _calculate_wind(self, wind):
+        max_altitude = HEIGHT  # Maximum altitude (meters) for wind scaling
+        min_altitude = 0    # Ground level
 
+        # Calculate the altitude proportion
+        altitude = HEIGHT - self.position.y
+        altitude_factor = max(min(altitude / max_altitude, 1.0), 0.0)  # Clamp to [0, 1]
+
+        # Scale the wind magnitude by the altitude factor
+        adjusted_wind = wind * altitude_factor
+        return adjusted_wind
 
     def _set_rect(self):
         return pygame.Rect(
             self.position.x * PIXELS_PER_METER - 1,
             self.position.y * PIXELS_PER_METER - 1,
             2,
-            2
+            2,
         )
