@@ -5,7 +5,7 @@ import pygame
 from pygame.math import Vector2
 
 from constants import SCREEN_HEIGHT, SCREEN_WIDTH, FPS, PIXELS_PER_METER, WIDTH, HEIGHT
-from entities import Grenade, Drone
+from entities import Grenade, Drone, Enemy
 
 
 class Environment:
@@ -70,6 +70,8 @@ class Environment:
         entities.append(Drone(random.randint(0, WIDTH), random.randint(0, HEIGHT-90)))
 
         entities.append(entities[0].grenade)
+
+        entities.append(Enemy(random.randint(20, WIDTH-20)))
 
         return entities
 
