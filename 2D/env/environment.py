@@ -23,7 +23,6 @@ class Environment:
         self.font = pygame.font.SysFont(None, 20)
         # Time tracking
         self.time_elapsed = 0  # Total time in seconds
-
         self.wind = self._generate_wind()
         self.entities = self._initialize_entities()
 
@@ -67,7 +66,11 @@ class Environment:
 
     def _initialize_entities(self):
         entities = []
-        entities.append(Grenade(WIDTH // 2, 10))
+        
+        grenade = Grenade(random.randint(0, WIDTH), random.randint(80, HEIGHT))
+        self.grenade_initial_pos = grenade.position.copy()
+
+        entities.append(grenade)
         return entities
 
     def _draw_scale(self):
@@ -118,8 +121,17 @@ class Environment:
         text = self.font.render(wind_text, True, (0, 0, 0))
         self.screen.blit(text, (SCREEN_WIDTH - 150, 90))
 
+    def _draw_straight_projectory(self):
+        pygame.draw.line(
+            self.screen, (0, 255, 0),
+            (self.grenade_initial_pos.x * PIXELS_PER_METER, self.grenade_initial_pos.y * PIXELS_PER_METER),
+            (self.grenade_initial_pos.x * PIXELS_PER_METER, SCREEN_HEIGHT), 
+            1
+        )
+
     def _draw_info(self):
         self._draw_scale()
         self._draw_time_counter()
         self._draw_grenade_velocity()
         self._draw_wind_info()
+        self._draw_straight_projectory()
