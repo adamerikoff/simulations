@@ -28,7 +28,7 @@ class Environment:
         self.score = 0  # Initialize score
         self.current_action = None
         self.mode = mode  # "human" or "rl"
-        self.action_space = [1, 2, 3]
+        self.action_space = [0, 1, 2]
 
     def reset(self):
         self.time_elapsed = 0
@@ -48,11 +48,11 @@ class Environment:
 
     def step(self, action, render=True):
         self.current_action = None
-        if action == 1:
+        if action == 0:
             self.current_action = "drone_left"
-        elif action == 2:
+        elif action == 1:
             self.current_action = "drone_right"
-        elif action == 3:
+        elif action == 2:
             self.current_action = "drone_release"
 
         # Update the environment

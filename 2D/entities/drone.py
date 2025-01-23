@@ -23,16 +23,18 @@ class Drone:
     def update(self, dt, action):
         if action == "drone_left":
             self.position.x -= self.speed * dt  # Move left
-            self.grenade.position.x -= self.speed * dt
+            if not self.grenade.released:
+                self.grenade.position.x -= self.speed * dt
         if action == "drone_right":
             self.position.x += self.speed * dt  # Move right
-            self.grenade.position.x += self.speed * dt
+            if not self.grenade.released:
+                self.grenade.position.x += self.speed * dt
         if action == "drone_release":
-            self.grenade.released = True
-            self.grenade_initial_pos = self.grenade.position.copy()
+            if not self.grenade.released:
+                self.grenade.released = True
+                self.grenade_initial_pos = self.grenade.position.copy()
         # Prevent the drone from going off-screen
         self.position.x = max(0, min(self.position.x, WIDTH))
-        self.grenade.position.x = max(0, min(self.grenade.position.x, WIDTH))
         # Update the rect position to match the new position
         self.rect = self._set_rect()
 
