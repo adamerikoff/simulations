@@ -20,17 +20,14 @@ class Drone:
 
         self.grenade = Grenade(self.position.x, self.position.y)
 
-    def update(self, dt):
-        # Movement controls based on arrow keys
-        keys = pygame.key.get_pressed()
-
-        if keys[pygame.K_LEFT]:
+    def update(self, dt, action):
+        if action == "drone_left":
             self.position.x -= self.speed * dt  # Move left
             self.grenade.position.x -= self.speed * dt
-        if keys[pygame.K_RIGHT]:
+        if action == "drone_right":
             self.position.x += self.speed * dt  # Move right
             self.grenade.position.x += self.speed * dt
-        if keys[pygame.K_DOWN]:
+        if action == "drone_release":
             self.grenade.released = True
             self.grenade_initial_pos = self.grenade.position.copy()
         # Prevent the drone from going off-screen

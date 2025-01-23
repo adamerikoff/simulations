@@ -26,12 +26,12 @@ class Environment:
         self.wind = self._generate_wind()
         self._initialize_entities()
         self.score = 0  # Initialize score
-
+        self.current_action = None
 
     def update(self):
         dt = self.clock.tick(FPS) / 1000.0
         self.time_elapsed += dt
-        self.drone.update(dt)
+        self.drone.update(dt, self.current_action)
         self.grenade.update(dt, self.wind)
         self.enemy.update()
         if self.grenade.hit_ground:
@@ -54,6 +54,16 @@ class Environment:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_LEFT:
+                        self.current_action = "drone_left"
+                    elif event.key == pygame.K_RIGHT:
+                        self.current_action = "drone_right"
+                    elif event.key == pygame.K_SPACE:
+                        self.current_action = "drone_release"
+                elif event.type == pygame.KEYUP:
+                    if event.key in (pygame.K_LEFT, pygame.K_RIGHT, pygame.K_SPACE):
+                        self.current_action = None
             # Update the environment
             self.update()
             # Render the environment
