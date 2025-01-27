@@ -4,7 +4,7 @@ from constants import HEIGHT
 from utils import Vector
 
 class Target:
-    def __init__(self, x, width=5, height=5):
+    def __init__(self, x, width=4, height=10):
         self.coordinates = Vector(x, HEIGHT)  # Position of the drone (top-left corner)
         self.width = width  # Width of the drone in meters
         self.height = height  # Height of the drone in meters

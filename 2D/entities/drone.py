@@ -1,5 +1,6 @@
 import pygame
 
+from constants import WIDTH, HEIGHT
 from utils import Vector
 from entities.grenade import Grenade
 
@@ -38,8 +39,6 @@ class Drone:
                 self.grenade.coordinates.y = self.coordinates.y + 1
             elif action == 2:
                 self.grenade.released = True
-            else:
-                pass
 
     def attach_grenade(self):
         self.grenade = Grenade(self.coordinates.x, self.coordinates.y + 1)

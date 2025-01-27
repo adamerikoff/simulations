@@ -25,6 +25,7 @@ class Environment:
         self.target = Target(random.randint(40, WIDTH-40))
         self.wind = self.generateWindForce()
         self.steps = 0
+        self.score = 0
 
         if self.renderMode and self.screen is None:
             pygame.init()
@@ -60,15 +61,21 @@ class Environment:
             grenade_coordinates = self.grenade.coordinates
             # Calculate the horizontal (X) distance between the grenade and the target
             distance = abs((target_coordinates - grenade_coordinates).magnitude())
-            if distance <= 50:
-                # Reward is higher the closer the grenade is to the target
-                reward = max(0, 100 - int(distance * 2))  # Reward increases as the distance decreases
+
+            if distance < 0:
+                # Pinpoint hit: perfect landing on the target
+                reward = 1000
+            elif distance <= 10:
+                # Within range of 10 meters: decaying reward
+                reward = max(0, 100 - distance*10) # Decaying reward as the distance increases
             else:
-                # Apply a growing penalty the farther the grenade is from the target
-                penalty = min(100, int(distance * 2))  # Increase penalty as distance grows
+                # Outside range of 10 meters: decaying penalty
+                penalty = min(0, distance * 10)  # Increasing penalty as the distance grows
                 reward = -penalty  # Negative penalty for missing the target area
+
             return reward
-        return 0
+        return -1
+
 
     def _is_done(self):
         return self.grenade.hit_ground
@@ -125,13 +132,13 @@ class Environment:
         self.screen.blit(text, (WIDTH * PIXELS_PER_METER - 150, 50))
 
     def _draw_wind_info(self):
-        wind_magnitude = self.wind.magnitude()
+        wind_magnitude = self.wind.x
         wind_text = f"Wind: {wind_magnitude:.2f} m/s"
         text = self.font.render(wind_text, True, (0, 0, 0))
         self.screen.blit(text, (WIDTH * PIXELS_PER_METER - 150, 90))
 
     def _draw_score(self):
-        score_text = f"Score: {self._calculate_reward()}"
+        score_text = f"Score: {self.score}"
         text = self.font.render(score_text, True, (0, 0, 0))
         self.screen.blit(text, (WIDTH * PIXELS_PER_METER - 150, 110))
 
