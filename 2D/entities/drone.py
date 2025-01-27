@@ -1,69 +1,61 @@
-import random
-import math
-
 import pygame
-from pygame.math import Vector2
 
-from constants import PIXELS_PER_METER, HEIGHT, WIDTH, SCREEN_HEIGHT, SCREEN_WIDTH
-from entities import Grenade
+from utils import Vector
+from entities.grenade import Grenade
 
 class Drone:
-    def __init__(self, x, y):
-        self.position = Vector2(x, y)
-        self.speed = 10  # Constant speed for movement
+    def __init__(self, x, y, width=5, height=2):
+        """
+        Initialize the drone.
 
-        self.color = (0, 0, 0)  # Black color for the drone
-        self.width = 20  # Width of the drone
-        self.height = 10  # Height of the drone
+        Args:
+            x (float): Initial x-coordinate in meters.
+            y (float): Initial y-coordinate in meters.
+            width (float): Width of the drone in meters (default: 2 meters).
+            height (float): Height of the drone in meters (default: 1 meter).
+        """
+        self.coordinates = Vector(x, y)  # Position of the drone (top-left corner)
+        self.width = width  # Width of the drone in meters
+        self.height = height  # Height of the drone in meters
+        self.grenade = None
 
-        self.rect = self._set_rect()  # Initialize the rect for collision checking
-
-        self.grenade = Grenade(self.position.x, self.position.y)
-
-    def update(self, dt, action):
-        if action == "drone_left":
-            self.position.x -= self.speed * dt  # Move left
-            if not self.grenade.released:
-                self.grenade.position.x -= self.speed * dt
-        if action == "drone_right":
-            self.position.x += self.speed * dt  # Move right
-            if not self.grenade.released:
-                self.grenade.position.x += self.speed * dt
-        if action == "drone_release":
-            if not self.grenade.released:
+    def update(self, action, dt):
+        """
+        Update the drone's position based on the action and time step.
+        
+        Args:
+            action (str): Action to be performed ("right", "left", "drop").
+            dt (float): Time step for the update.
+        """
+        if not self.grenade.released:
+            if action == "right":
+                self.coordinates.x += 10 * dt  # Move right
+                self.grenade.coordinates.x = self.coordinates.x
+                self.grenade.coordinates.y = self.coordinates.y + 1
+            elif action == "left":
+                self.coordinates.x -= 10 * dt  # Move left
+                self.grenade.coordinates.x = self.coordinates.x
+                self.grenade.coordinates.y = self.coordinates.y + 1
+            elif action == "drop":
                 self.grenade.released = True
-                self.grenade_initial_pos = self.grenade.position.copy()
-        # Prevent the drone from going off-screen
-        self.position.x = max(0, min(self.position.x, WIDTH))
-        # Update the rect position to match the new position
-        self.rect = self._set_rect()
 
-    def render(self, screen):
-        # Convert position to pixels for rendering
-        position_pixels = self.position * PIXELS_PER_METER
-        pygame.draw.rect(
-            screen, self.color,
-            pygame.Rect(
-                position_pixels.x - self.width // 2,  # Center the rectangle
-                position_pixels.y - self.height // 2,  # Center the rectangle
-                self.width, self.height
-            )
-        )
-        # if self.grenade.released:
-        #     self._draw_straight_projectory(screen)
+    def attach_grenade(self):
+        self.grenade = Grenade(self.coordinates.x, self.coordinates.y + 1)
+        return self.grenade
 
-    def _draw_straight_projectory(self, screen):
-        pygame.draw.line(
-            screen, (0, 255, 0),
-            (self.grenade_initial_pos.x * PIXELS_PER_METER, self.grenade_initial_pos.y * PIXELS_PER_METER),
-            (self.grenade_initial_pos.x * PIXELS_PER_METER, SCREEN_HEIGHT), 
-            1
-        )
+    def render(self, screen, pixel_per_meter):
+        """
+        Render the drone as a rectangle on the screen.
+        
+        Args:
+            screen (pygame.Surface): The Pygame screen to render on.
+            pixel_per_meter (int): Conversion factor from meters to pixels.
+        """
+        # Convert world coordinates and dimensions to screen coordinates
+        screen_x = int((self.coordinates.x - self.width / 2) * pixel_per_meter)
+        screen_y = int((self.coordinates.y - self.height / 2) * pixel_per_meter)
+        screen_width = int(self.width * pixel_per_meter)
+        screen_height = int(self.height * pixel_per_meter)
 
-    def _set_rect(self):
-        return pygame.Rect(
-            self.position.x * PIXELS_PER_METER - self.width // 2,
-            self.position.y * PIXELS_PER_METER - self.height // 2,
-            self.width, self.height
-        )
-
+        # Draw the drone as a rectangle
+        pygame.draw.rect(screen, (0, 0, 255), (screen_x, screen_y, screen_width, screen_height))
