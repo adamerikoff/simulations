@@ -41,17 +41,17 @@ class Environment:
         done = self._is_done()
         reward = self._calculate_reward()
         observation = self._get_observation()
-        
+
         return observation, reward, done, {}
 
     def _get_observation(self):
-        observation = {
-            "drone_position": self.drone.coordinates,
-            "grenade_position": self.grenade.coordinates,
-            "target_position": self.target.coordinates,
-            "wind_vector": self.wind,
-            "released_grenade": int(self.grenade.released)
-        }
+        observation = [
+            self.drone.coordinates.x, self.drone.coordinates.y,
+            self.grenade.coordinates.x, self.grenade.coordinates.y,
+            self.target.coordinates.x, self.target.coordinates.y,
+            self.wind.x, self.wind.y,
+            int(self.grenade.released)
+        ]
         return observation
 
     def _calculate_reward(self):
@@ -78,7 +78,7 @@ class Environment:
 
     def render(self):
         if not self.renderMode:
-            return
+            raise Exception("Render is not True.")
         if self.screen is None:
             raise Exception("Pygame not initialized. Call reset() or set renderMode=True before rendering.")
 
@@ -105,7 +105,12 @@ class Environment:
             self.screen.blit(text, (5, (HEIGHT - y) * PIXELS_PER_METER))
 
     def _draw_time_counter(self):
-        time_text = f"Time: {self.steps * self.dt:.2f} s"  # Example time counter, you may adjust logic
+        total_time = self.steps * self.dt  # Total simulation time
+        minutes = int(total_time // 60)  # Integer division to get seconds
+        seconds = total_time % 60  # Get the remainder for microseconds
+        rounded_seconds = round(seconds, 2)  # Round to two decimal places for seconds
+
+        time_text = f"Time: {minutes:02}:{rounded_seconds:05.2f}"  # Format as mm:ss.xx
         text = self.font.render(time_text, True, (0, 0, 0))
         self.screen.blit(text, (WIDTH * PIXELS_PER_METER - 150, 10))
 

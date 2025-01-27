@@ -28,16 +28,18 @@ class Drone:
             dt (float): Time step for the update.
         """
         if not self.grenade.released:
-            if action == "right":
+            if action == 0:
                 self.coordinates.x += 10 * dt  # Move right
                 self.grenade.coordinates.x = self.coordinates.x
                 self.grenade.coordinates.y = self.coordinates.y + 1
-            elif action == "left":
+            elif action == 1:
                 self.coordinates.x -= 10 * dt  # Move left
                 self.grenade.coordinates.x = self.coordinates.x
                 self.grenade.coordinates.y = self.coordinates.y + 1
-            elif action == "drop":
+            elif action == 2:
                 self.grenade.released = True
+            else:
+                pass
 
     def attach_grenade(self):
         self.grenade = Grenade(self.coordinates.x, self.coordinates.y + 1)
