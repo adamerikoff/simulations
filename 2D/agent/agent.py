@@ -1,8 +1,8 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
 import torch.optim as optim
+
 import random
 import numpy as np
 from collections import deque
@@ -10,35 +10,19 @@ from collections import deque
 class QNetwork(nn.Module):
     def __init__(self, state_size, action_size):
         super(QNetwork, self).__init__()
-        # Define the layers of the neural network
-        self.fc1 = nn.Linear(state_size, 1024)  # Input to first hidden layer
-        self.fc2 = nn.Linear(1024, 512)  # Second hidden layer
-        self.fc3 = nn.Linear(512, 256)  # Third hidden layer
-        self.fc4 = nn.Linear(256, 128)  # Fourth hidden layer
-        self.fc5 = nn.Linear(128, 64)   # Fifth hidden layer
-        self.fc6 = nn.Linear(64, 32)    # Sixth hidden layer
-        self.fc7 = nn.Linear(32, 16)    # Seventh hidden layer
-        self.fc8 = nn.Linear(16, 8)     # Eighth hidden layer
-        self.fc9 = nn.Linear(8, 4)      # Ninth hidden layer
-        self.fc10 = nn.Linear(4, 2)     # Tenth hidden layer
-        self.fc11 = nn.Linear(2, 1)     # Eleventh hidden layer
-        self.fc12 = nn.Linear(1, action_size)  # Output layer (Q-values for each action)
+        # Define a simpler architecture
+        self.fc1 = nn.Linear(state_size, 128)  # Input to first hidden layer
+        self.fc2 = nn.Linear(128, 64)         # Second hidden layer
+        self.fc3 = nn.Linear(64, 32)          # Third hidden layer
+        self.fc4 = nn.Linear(32, action_size) # Output layer (Q-values for each action)
     
     def forward(self, state):
         # Apply activation functions after each layer
         x = F.relu(self.fc1(state))
         x = F.relu(self.fc2(x))
         x = F.relu(self.fc3(x))
-        x = F.relu(self.fc4(x))
-        x = F.relu(self.fc5(x))
-        x = F.relu(self.fc6(x))
-        x = F.relu(self.fc7(x))
-        x = F.relu(self.fc8(x))
-        x = F.relu(self.fc9(x))
-        x = F.relu(self.fc10(x))
-        x = F.relu(self.fc11(x))
-        return self.fc12(x)  # Output Q-values for each action
-    
+        return self.fc4(x)  # Output Q-values for each action
+
 class ReplayBuffer:
     def __init__(self, buffer_size, batch_size):
         self.buffer = deque(maxlen=buffer_size)
@@ -66,7 +50,7 @@ class DQNAgent:
         self.q_network = QNetwork(state_size, action_size)
         self.optimizer = optim.Adam(self.q_network.parameters(), lr=self.learning_rate)
         # Replay buffer
-        self.replay_buffer = ReplayBuffer(buffer_size=5000, batch_size=128)
+        self.replay_buffer = ReplayBuffer(buffer_size=2000, batch_size=64)
 
     def act(self, state):
         # Epsilon-greedy policy
