@@ -2,6 +2,7 @@ import os
 
 import pygame
 import torch
+import pandas as pd
 
 from environment import Environment
 from agent import DQNAgent
@@ -38,17 +39,19 @@ def main(mode="human"):
                   f"------------------------")
         print("Episode finished!")
 
-    elif mode == "training":
+    elif mode == "train":
         env = Environment(renderMode=True)  # Enable rendering
         action_space = ["right", "left", "drop"]
         state_size = 9
-        episodes = 5000
+        episodes = 2000
 
         agent = DQNAgent(state_size, len(action_space))
 
         # Create the directory to save models if it doesn't exist
         save_dir = "brains"
         os.makedirs(save_dir, exist_ok=True)
+
+        plot_data = []
 
         for episode in range(episodes):
             state = env.reset()  # Reset the environment and get initial state
@@ -72,7 +75,11 @@ def main(mode="human"):
 
             if (episode + 1) % 2 == 0:
                 agent.decay_epsilon()
+                plot_data.append((episode, total_reward))
             
+            if total_reward > 0:
+                print(30*"!")
+
             print(f"--- Simulation Status ---\n"
                   f"Episode {episode+1}/{episodes}\n"
                   f"Total Reward: {total_reward}\n"
@@ -85,10 +92,13 @@ def main(mode="human"):
                 model_path = os.path.join(save_dir, f"model_episode_{episode+1}.pth")
                 torch.save(agent.q_network.state_dict(), model_path)
                 print(f"Model saved at episode {episode+1} to {model_path}")
+        
+        df = pd.DataFrame(plot_data)
+        df.to_csv("plot_data.csv", index=False, header=False)
 
     elif mode == "test":
         # Select a model from the brain folder
-        model_name = ""
+        model_name = "model_episode_2000.pth"
         model_path = os.path.join("brains", model_name)
 
         if not os.path.exists(model_path):
@@ -119,9 +129,10 @@ def main(mode="human"):
                 total_reward += reward
 
             print(f"Trial {trial + 1} Total Reward: {total_reward}")
-
     env.close()
 
 
 if __name__ == "__main__":
-    main("training")
+    # main("human")
+    main("train")
+    # main("test")

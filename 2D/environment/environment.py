@@ -57,24 +57,15 @@ class Environment:
 
     def _calculate_reward(self):
         if self.grenade.hit_ground:
-            target_coordinates = self.target.coordinates
-            grenade_coordinates = self.grenade.coordinates
+            target_x = self.target.coordinates.x
+            grenade_x = self.grenade.coordinates.x
             # Calculate the horizontal (X) distance between the grenade and the target
-            distance = abs((target_coordinates - grenade_coordinates).magnitude())
-
-            if distance < 0:
-                # Pinpoint hit: perfect landing on the target
-                reward = 1000
-            elif distance <= 10:
-                # Within range of 10 meters: decaying reward
-                reward = max(0, 100 - distance*10) # Decaying reward as the distance increases
+            distance = math.sqrt(abs(target_x**2 - grenade_x**2))
+            if distance <= 10:
+                return 1000
             else:
-                # Outside range of 10 meters: decaying penalty
-                penalty = min(0, distance * 10)  # Increasing penalty as the distance grows
-                reward = -penalty  # Negative penalty for missing the target area
-
-            return reward
-        return -1
+                return -distance  # Negative penalty for missing the target area
+        return -0.2
 
 
     def _is_done(self):

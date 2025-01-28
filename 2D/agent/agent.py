@@ -50,12 +50,13 @@ class DQNAgent:
         self.q_network = QNetwork(state_size, action_size)
         self.optimizer = optim.Adam(self.q_network.parameters(), lr=self.learning_rate)
         # Replay buffer
-        self.replay_buffer = ReplayBuffer(buffer_size=2000, batch_size=64)
+        self.replay_buffer = ReplayBuffer(buffer_size=2000, batch_size=128)
 
-    def act(self, state):
+    def act(self, state, greedy=False):
         # Epsilon-greedy policy
-        if random.random() <= self.epsilon:
-            return random.randint(0, self.action_size - 1)  # Explore: Random action
+        if not greedy:
+            if random.random() <= self.epsilon:
+                return random.randint(0, self.action_size - 1)  # Explore: Random action
         state = torch.FloatTensor(state).unsqueeze(0)  # Convert state to tensor
         q_values = self.q_network(state)  # Get Q-values from the network
         return torch.argmax(q_values).item()  # Exploit: Action with max Q-value

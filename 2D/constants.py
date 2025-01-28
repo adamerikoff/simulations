@@ -8,4 +8,4 @@ GRAVITY = 9.81 # m/s^2
 AIR_DENSITY = 1.225  # kg/m³ at sea level and standard temperature (15°C)
 
 PIXELS_PER_METER = 5
-RENDER_PAUSE = 0.0005
+RENDER_PAUSE = 0.0001
